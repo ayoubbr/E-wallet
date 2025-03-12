@@ -23,12 +23,12 @@ class Transfer extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function sender_wallet()
+    public function sender_w()
     {
         return $this->belongsTo(Wallet::class, 'sender_wallet');
     }
 
-    public function receiver_wallet()
+    public function receiver_w()
     {
         return $this->belongsTo(Wallet::class, 'receiver_wallet');
     }

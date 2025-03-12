@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\TransferController;
+use App\Http\Controllers\WalletController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,8 +31,8 @@ Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
-
     Route::post('/transfers', [TransferController::class, 'transfer']);
-    Route::post('/transfers/stock', [TransferController::class, 'stock']);
-    
+    Route::post('/transfers/rollback', [TransferController::class, 'rollback']);
+    Route::post('/wallets/deposit', [WalletController::class, 'deposit']);
+    Route::post('/wallets/withdraw', [WalletController::class, 'withdraw']);
 });

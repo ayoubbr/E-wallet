@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Transfer;
 use App\Models\User;
+use App\Models\Wallet;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -69,18 +70,46 @@ class TransferController extends Controller
         }
     }
 
-    public function stock(Request $request){
-       
-        $stockData = $request->validate([
-            'amount' => 'required',
-            'receiver_email' => 'required',
-            'receiver_firstname' => 'required',
-            'receiver_lastname' => 'required'
+    public function rollback(Request $request)
+    {
+        $rollbackData = $request->validate([
+            'serial' => 'required'
         ]);
-    }
 
-    public function rollback(Request $request){
-        
-    }
+        $transfer = Transfer::where('serial', $rollbackData['serial'])->first();
 
+        if (is_null($transfer)) {
+            return response()->json(['message' => 'Data not found!']);
+        } else {
+
+            $sender_wallet = $transfer->sender_w;
+            $receiver_wallet = $transfer->receiver_w;
+
+            if (is_null($sender_wallet)) {
+                return response()->json([
+                    'message' => 'Sender wallet not found!'
+                ]);
+            } else if (is_null($receiver_wallet)) {
+                return response()->json([
+                    'message' => 'Receiver wallet not found!'
+                ]);
+            } else {
+
+                $sender_wallet->balance += $transfer->amount;
+                $receiver_wallet->balance -= $transfer->amount;
+
+                $transfer->status = 'rolledback';
+                $transfer->admin_id = auth()->user()->id;
+
+                $sender_wallet->save();
+                $receiver_wallet->save();
+                $transfer->save();
+
+
+                return response()->json([
+                    'transfer' => $transfer
+                ]);
+            }
+        }
+    }
 }

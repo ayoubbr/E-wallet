@@ -16,13 +16,14 @@ return new class extends Migration
         Schema::create('transfers', function (Blueprint $table) {
             $table->id();
             $table->string('serial');
-            $table->date('date');
             $table->string('status');
             $table->decimal('amount');
-            $table->unsignedBigInteger('sender_id');
-            $table->foreign('sender_id')->references('id')->on('users')->onDelete('cascade');
-            $table->unsignedBigInteger('receiver_id');
-            $table->foreign('receiver_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('sender_wallet');
+            $table->foreign('sender_wallet')->references('id')->on('wallets')->onDelete('cascade');
+            $table->unsignedBigInteger('receiver_wallet');
+            $table->foreign('receiver_wallet')->references('id')->on('wallets')->onDelete('cascade');
+            $table->unsignedBigInteger('admin_id')->nullable();
+            $table->foreign('admin_id')->references('id')->on('users')->nullOnDelete();
             $table->timestamps();
         });
     }

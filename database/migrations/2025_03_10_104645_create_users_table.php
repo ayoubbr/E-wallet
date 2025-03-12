@@ -23,8 +23,6 @@ return new class extends Migration
             $table->string('status');
             $table->unsignedBigInteger('role_id')->nullable();
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
-            $table->unsignedBigInteger('wallet_id')->nullable();
-            $table->foreign('wallet_id')->references('id')->on('wallets')->onDelete('cascade');
             $table->rememberToken();
             $table->timestamps();
         });

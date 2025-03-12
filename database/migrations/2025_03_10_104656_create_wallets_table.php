@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('serial');
             $table->decimal('balance');
             $table->string('status');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

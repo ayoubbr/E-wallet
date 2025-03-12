@@ -47,5 +47,18 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    public function transfers()
+    {
+        return $this->hasMany(Transfer::class, 'admin_id');
+    }
 }

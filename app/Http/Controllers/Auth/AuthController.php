@@ -3,9 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
+use App\Models\Wallet;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use PhpParser\Node\Stmt\Catch_;
 
 class AuthController extends Controller
 {
@@ -15,21 +21,45 @@ class AuthController extends Controller
             'firstname' => 'required|string',
             'lastname' => 'required|string',
             'email' => 'required|string|email|unique:users',
-            'password' => 'required|min:5'
+            'password' => 'required|min:5',
+            'role_name' => 'required',
         ]);
 
-        $user = User::create([
-            'firstname' => $registerUserData['firstname'],
-            'lastname' => $registerUserData['lastname'],
-            'email' => $registerUserData['email'],
-            'password' => Hash::make($registerUserData['password']),
-            'role_id' => 2,
-            'status' => 'active',
-        ]);
+        try {
 
-        return response()->json([
-            'message' => 'User Created ',
-        ]);
+            DB::beginTransaction();
+
+            $roleName = $registerUserData['role_name'] ?? 'user';
+            $role = Role::whereRaw('LOWER(name) = ?', [strtolower($roleName)])->first();
+
+            if (!$role) {
+                $role = Role::create(['name' => $roleName, 'description' => '']);
+            }
+
+            $user = User::create([
+                'firstname' => $registerUserData['firstname'],
+                'lastname' => $registerUserData['lastname'],
+                'email' => $registerUserData['email'],
+                'password' => Hash::make($registerUserData['password']),
+                'role_id' => $role->id,
+                'status' => 'active'
+            ]);
+
+            Wallet::create([
+                'serial' => strtoupper(Str::random(10)),
+                'balance' => 0.00,
+                'status' => 'active',
+                'user_id' => $user->id,
+            ]);
+
+            DB::commit();
+
+            return response()->json(['message' => 'User Created with wallet and role.']);
+        } catch (Exception $e) {
+
+            return redirect()->back()->with('error', 'Failed to create user with wallet: ' . $e->getMessage());
+            DB::rollBack();
+        }
     }
 
     public function login(Request $request)
@@ -47,7 +77,7 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken($user->name . '-AuthToken')->plainTextToken;
-       
+
         return response()->json([
             'access_token' => $token,
         ]);

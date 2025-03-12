@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\TransferController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,12 +20,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
 Route::get('/', function () {
     return 'hello world';
 });
-    
+
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
-Route::post('logout', [AuthController::class, 'logout'])
-    ->middleware('auth:sanctum');
+
+Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::post('/transfers', [TransferController::class, 'transfer']);
+    Route::post('/transfers/stock', [TransferController::class, 'stock']);
+    
+});

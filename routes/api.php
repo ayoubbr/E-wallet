@@ -21,16 +21,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/', function () {
-    return 'hello world';
-});
-
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
-Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout']);
     Route::post('/transfers', [TransferController::class, 'transfer']);
     Route::post('/transfers/rollback', [TransferController::class, 'rollback']);
     Route::post('/wallets/deposit', [WalletController::class, 'deposit']);
